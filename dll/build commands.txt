@@ -1,0 +1,7 @@
+Build using x64 native tools command prompt for VS 2022.
+
+Build obj:
+cl /EHsc /c .\src\*.cpp /I .\include /Fo".\obj\\"
+
+Build dll:
+link /DLL /OUT:serial.dll .\obj\*.obj
