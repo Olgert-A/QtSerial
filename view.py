@@ -30,7 +30,8 @@ class MainView(QMainWindow):
         if self.serial is None:
             self.serial = Serial()
 
-        self.serial.read(self.callback)
+        print(self.serial.open(1, 115200, self.callback))
+        #self.serial.read(self.callback)
 
     def read_event(self, data):
         formatted_data = ' '.join([f'{byte:02X}' for byte in data])
