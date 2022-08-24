@@ -26,7 +26,7 @@ extern "C"{
     EXPORT CSerial* __stdcall CreateSerial();
     EXPORT void __stdcall DeleteSerial(CSerial* serial);
     EXPORT bool __stdcall SerialOpen(CSerial* serial, int port_number, int baud_rate, void (*callback)(char*));
-    EXPORT bool __stdcall SerialConnected();
-    EXPORT void __stdcall SerialClose();
-    EXPORT int __stdcall SerialWrite();
+    EXPORT bool __stdcall SerialConnected(CSerial* serial);
+    EXPORT void __stdcall SerialClose(CSerial* serial);
+    EXPORT int __stdcall SerialWrite(CSerial* serial, char* data, int size);
 }
