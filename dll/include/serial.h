@@ -15,14 +15,15 @@ public:
     void    Close();                                                        //close port
     int     Write(char* data, int size);                                    //write bytes to port
 private:
-    bool    CreateConnection();                                             //create connection to port
-    bool    SetupConnection();                                              //setup timeouts and [pr
+    bool    CreateConnection(int port_number);                              //create connection to port
+    bool    SetupConnection(int baud_rate);                                 //setup timeouts and [pr
     bool    StartReading();                                                 //start reading thread
-    static DWORD WINAPI Read(LPVOID lpParam);                        //read method in other thread
+    static DWORD WINAPI Read(LPVOID lpParam);                               //read method in other thread
 };
 
 extern "C"{
     #define EXPORT __declspec(dllexport)
-    EXPORT CSerial* __stdcall newCSerial();
-    EXPORT void __stdcall delCSerial(CSerial* pSerial);
+    EXPORT CSerial* __stdcall CreateSerial();
+    EXPORT void __stdcall DeleteSerial(CSerial* serial);
+    EXPORT bool __stdcall SerialOpen()
 }
