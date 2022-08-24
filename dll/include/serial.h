@@ -3,20 +3,21 @@
 class CSerial
 {
 private:
-    HANDLE	m_hPort;                //port handle
-    HANDLE	m_hThread;              //thread handle
-    bool	m_fReading;             //reading cycle exit flag
-    void    (*m_pCallback)(char*);     //callback method to send read bytes
+    HANDLE	m_port;                //port handle
+    HANDLE	m_thread;              //thread handle
+    bool	m_reading;             //reading cycle exit flag
+    void    (*m_callback)(char*);     //callback method to send read bytes
 public:
     CSerial();
     ~CSerial();
-    bool Open(int nPortNumber, int nBaudRate); //open port with nPortNumber and
-    void read(void (*callback)(char*));
+    bool    Open(int port_number, int baud_rate, void (*callback)(char*));  //open port with port_number and baud_rate
+    void    Close();                                                        //close port
+    int     Write(char* data, int size);                                    //write bytes to port
 private:
-    bool OpenPort();
-    bool SetupConnection();
-    bool StartReading();
-    static DWORD WINAPI thread_func(LPVOID lpParam);  //read method in other thread
+    bool    CreateConnection();                                             //create connection to port
+    bool    SetupConnection();                                              //setup timeouts and [pr
+    bool    StartReading();                                                 //start reading thread
+    static DWORD WINAPI thread_func(LPVOID lpParam);                        //read method in other thread
 };
 
 extern "C"{
