@@ -25,5 +25,5 @@ extern "C"{
     #define EXPORT __declspec(dllexport)
     EXPORT CSerial* __stdcall CreateSerial();
     EXPORT void __stdcall DeleteSerial(CSerial* serial);
-    EXPORT bool __stdcall SerialOpen()
+    EXPORT bool __stdcall SerialOpen(CSerial* serial, int port_number, int baud_rate, void (*callback)(char*))
 }
