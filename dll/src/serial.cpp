@@ -96,19 +96,14 @@ bool CSerial::SetupConnection(int baud_rate)
     if (m_port == NULL )
         return false;
 
-    //set port settings
     DCB dcb;
-	FillMemory(&dcb, sizeof(dcb), 0);		//set 0 to dcb
-	if (!GetCommState(m_port, &dcb))		// get current DCB
-	    return false;						// Error in GetCommState
+    char settings[100];
+    FillMemory(&dcb, sizeof(dcb), 0);
+	dcb.DCBlength = sizeof(dcb);
+	sprintf_s(settings, "%i,n,8,1", baud_rate);
 
-    dcb.BaudRate = baud_rate;
-	dcb.ByteSize = 8;
-	dcb.Parity = NOPARITY;
-	dcb.StopBits = 1;
-
-	if (!SetCommState(m_port, &dcb))
-		return false;
+	if (!BuildCommDCB(settings, &dcb) || !SetCommState(m_port, &dcb))
+	    return false;								// Couldn't build the DCB. Usually a problem with the communications specification string.
 
     // set timeouts
 	COMMTIMEOUTS timeouts;
