@@ -8,6 +8,11 @@ class MainView(QMainWindow):
     def __init__(self):
         super().__init__()
 
+        #init callback functype and set
+        cb_type = ctypes.CFUNCTYPE(None, ctypes.c_char_p)
+        self.callback = cb_type(self.read_event)
+        self.serial = None
+
         self.read_list = QListWidget()
         self.open_port = QPushButton('Open port')
 
@@ -22,6 +27,10 @@ class MainView(QMainWindow):
         self.setCentralWidget(main_widget)
 
     def open_port_pressed(self):
+        if self.serial is None:
+            self.serial = Serial()
+
+        self.serial.read(self.callback)
         pass
 
     def read_event(self, data):
