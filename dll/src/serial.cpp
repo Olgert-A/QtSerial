@@ -161,14 +161,34 @@ DWORD WINAPI CSerial::Read(LPVOID lpParam)
     return 0;
 }
 
+// ===================== EXTERNAL METHODS =====================
 
-
-CSerial* __stdcall newCSerial()
+CSerial* CreateSerial()
 {
     return new CSerial();
 }
 
-void __stdcall delCSerial(CSerial* pSerial)
+void DeleteSerial(CSerial* pSerial)
 {
     delete pSerial;
+}
+
+bool SerialOpen(CSerial* serial, int port_number, int baud_rate, void (*callback)(char*))
+{
+    return serial->Open(port_number, baud_rate, callback);
+}
+
+bool SerialConnected(CSerial* serial)
+{
+    return serial->Connected();
+}
+
+void SerialClose(CSerial* serial)
+{
+    serial->Close();
+}
+
+int SerialWrite(CSerial* serial, char* data, int size)
+{
+    return serial->Write(data, size);
 }
