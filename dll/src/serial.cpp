@@ -143,14 +143,90 @@ bool CSerial::StartReading()
 
 DWORD WINAPI CSerial::Read(LPVOID lpParam)
 {
-    CSerial* pSerial = (CSerial*)lpParam;
+    CSerial* serial = (CSerial*)lpParam;
+    OVERLAPPED osRead = { 0 };
+    int TIMEOUT = 500;
+    bool fWaitingOnRead = false;
+    DWORD dwReaded;
 
-    char datas[]={0x43,0x4d,0x30,0x35,0x0f,0x0D};
-    for (int i=0; i<6; i++)
+    const int buffer_size = 1;
+    char buffer[buffer_size];
+
+
+    while(serial->m_reading)
     {
-        char item[]={datas[i]};
-        pSerial->m_callback(item);
-        Sleep(1000);
+        if (!fWaitingOnRead)
+			{
+				if (osRead.hEvent != NULL)
+				{
+					CloseHandle(osRead.hEvent);
+					ZeroMemory(&osRead, sizeof(osRead));
+				}
+
+				osRead.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+				if (osRead.hEvent == NULL)
+					return 0;
+
+				if (!ReadFile(serial->m_port, buffer, buffer_size, &dwReaded, &osRead))
+				{
+					if (GetLastError() != ERROR_IO_PENDING)			// Error in communications;
+					{
+						CloseHandle(osRead.hEvent);
+						return 0;
+					}
+					else
+						fWaitingOnRead = true;		//включает ожидание события чтения
+				}
+				else													// read completed immediately
+				{
+					if (dwReaded == buffer_size)
+					{
+					    serial->m_callback(buffer);
+						//TODO post
+						//PostMessage();
+					}
+					else
+					{
+					}
+				}
+			}
+
+			if (fWaitingOnRead)
+			{
+				switch (WaitForSingleObject(osRead.hEvent, TIMEOUT))
+				{
+				case WAIT_OBJECT_0:					// Read completed.
+					if (!GetOverlappedResult(serial->m_port, &osRead, &dwReaded, FALSE))		// Error in communications;
+					{
+						CloseHandle(osRead.hEvent);
+						return 0;
+					}
+					else							// Read completed successfully.
+					{
+						if (dwReaded == buffer_size)
+						{
+						    serial->m_callback(buffer);
+							//TODO post
+						    //PostMessage();
+						}
+						else
+						{
+
+						}
+
+						fWaitingOnRead = false;
+					}
+					break;
+
+				case WAIT_TIMEOUT:
+					break;
+
+				default:
+					CloseHandle(osRead.hEvent);
+					return 0;
+					break;
+				}
+			}
     }
 
     return 0;
