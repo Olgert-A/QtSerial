@@ -65,7 +65,32 @@ void CSerial::Close()
 
 int CSerial::Write(char* data, int size)
 {
-    return 0;
+    DWORD dwBytesWritten = 0;
+    OVERLAPPED osWrite = { 0 };
+
+	osWrite.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	if (osWrite.hEvent != NULL)
+	{
+	    // Issue write.
+        if (!WriteFile(m_port, data, size, &dwBytesWritten, &osWrite))
+        {
+            if (GetLastError() == ERROR_IO_PENDING) // Write is pending.
+            {
+                DWORD dwBytesOverlapped;
+                if (GetOverlappedResult(m_port, &osWrite, &dwBytesOverlapped, TRUE))
+                    dwBytesWritten = dwBytesOverlapped; // Write operation completed successfully.
+                else
+                    dwBytesWritten = 0;
+            }
+            else
+                dwBytesWritten = 0; // WriteFile failed, but it isn't delayed. Report error and abort.
+        }
+	}
+	else
+	    return 0;
+
+	CloseHandle(osWrite.hEvent);
+	return dwBytesWritten;
 }
 
 //================= private =======================
